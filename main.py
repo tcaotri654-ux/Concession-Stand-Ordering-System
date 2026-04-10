@@ -256,31 +256,33 @@ def add_chips():
 
 
 
-def add_fries():
-    print("\nwe have 3 types of fries: curly, crinkle, and shoestring. please choose one")
-    choice = input("enter the type of fries you want: ").lower().strip()
+def add_fries(choice=None):
+    if choice is None:
+        print("\nwe have 3 types of fries: curly, crinkle, and shoestring. please choose one")
+        choice = input("enter the type of fries you want: ").lower().strip()
     
     if choice in fries_type:
         fries_name = f"{choice} fries"
         size, size_cost = size_up()  
         fries_name = f"{size} {fries_name}" 
-        extra = fries_type[choice] + size_cost # tính tiền ở đây
+        extra = fries_type[choice] + size_cost
         cart.append(fries_name)
         print(f"{fries_name} added to cart. current total: ${total:.2f}")
-        return extra # trả tiền
+        return extra
     else:
         print("sorry we don't have that type of fries, please choose from curly, crinkle, and shoestring")
         return 0.00
 
 
-def add_soda():
-    print("we have 3 flavors of soda: cola, lemon-lime, and orange. please choose one")
-    choice = input("enter the flavor of soda you want: ").lower().strip()
-
+def add_soda(choice=None):
+    if choice is None:
+        print("we have 3 flavors of soda: cola, lemon-lime, and orange. please choose one")
+        choice = input("enter the flavor of soda you want: ").lower().strip()
+    
     if choice in soda_flavor:
         soda_name = f"{choice} soda"
-        size, size_cost = size_up()      # chỗ này thêm size để gọi nó ra
-        soda_name = f"{size} {soda_name}" # đây là chỗ nó gọi tên
+        size, size_cost = size_up()
+        soda_name = f"{size} {soda_name}"
         cart.append(soda_name)
         extra = soda_flavor[choice] + size_cost
         print(f"{soda_name} added to cart, current total: ${total:.2f}")
@@ -334,27 +336,57 @@ while True:
         print("please enter a food item!")
         continue
     elif food in menu:
-        total += menu[food]
-        print(f"{food.capitalize()} added to cart. current total: ${total:.2f}")
-        if food == "fries":
-            total += add_fries()
-        elif food == "soda":
-            total += add_soda()
-        elif food == "popcorn":
-            total += add_popcorn()
-        elif food == "chips":
-            total += add_chips()
-        elif food == "hamburger":
-            total += add_hamburger()
-        elif food == "hot dog":
-            total += add_hot_dog()
-
-        else:
-            cart.append(food)  #fix this part or use if elif and else mà tôi sẽ add soon
+        try:
+            quantity = int(input(f"How many {food} do you want? "))
+            if quantity <= 0:
+                print("Quantity must be positive.")
+                continue
+            if food == "soda":
+                print("we have 3 flavors of soda: cola, lemon-lime, and orange. please choose one")
+                flavor = input("enter the flavor of soda you want: ").lower().strip()
+                if flavor not in soda_flavor:
+                    print("sorry we don't have that flavor of soda, please choose from cola, lemon-lime, and orange")
+                    continue
+                for _ in range(quantity):
+                    total += menu[food] + add_soda(flavor)
+            elif food == "fries":
+                print("\nwe have 3 types of fries: curly, crinkle, and shoestring. please choose one")
+                fry_type = input("enter the type of fries you want: ").lower().strip()
+                if fry_type not in fries_type:
+                    print("sorry we don't have that type of fries, please choose from curly, crinkle, and shoestring")
+                    continue
+                for _ in range(quantity):
+                    total += menu[food] + add_fries(fry_type)
+            else:
+                for _ in range(quantity):
+                    total += menu[food]
+                    cart.append(food)
+                    if food == "popcorn":
+                        total += add_popcorn()
+                    elif food == "chips":
+                        total += add_chips()
+                    elif food == "hamburger":
+                        total += add_hamburger()
+                    elif food == "hot dog":
+                        total += add_hot_dog()
+            print(f"{quantity} {food.capitalize()} added to cart. Current total: ${total:.2f}")
+        except ValueError:
+            print("Please enter a valid number for quantity.")
+            continue
     elif food in burger_ingredients:
-        total += menu["hamburger"]
-        print(f"{food.title()} added to cart. current total: ${total:.2f}")
-        total += add_hamburger(food)
+        try:
+            quantity = int(input(f"How many {food} do you want? "))
+            if quantity <= 0:
+                print("Quantity must be positive.")
+                continue
+            for _ in range(quantity):
+                total += menu["hamburger"]
+                cart.append(food)
+                total += add_hamburger(food)
+            print(f"{quantity} {food.title()} added to cart. Current total: ${total:.2f}")
+        except ValueError:
+            print("Please enter a valid number for quantity.")
+            continue
     elif food in menu_combos:
         total += add_combos(food)
 
@@ -363,7 +395,7 @@ while True:
         print("sorry we don't have that item, please choose from the menu")
 
 
-
+# nói chung phần này ổn có thể kiểm tra trong tương lai
 print("\n" + "-"*20)
 print("your order summary:")
 print("-"*20)
